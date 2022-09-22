@@ -35,7 +35,7 @@
     "@statewalker/fsm-process": "0.16.0",
     "@statewalker/services": "0.2.2",
     "@statewalker/store": "0.3.1",
-    ">@statewalker/utils": "0.3.1"
+    "@statewalker/utils": "0.3.1"
   },
   "repository": {
     "type": "git",
