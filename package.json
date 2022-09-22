@@ -1,6 +1,6 @@
 {
   "name": "@statewalker/fsm-core",
-  "version": "0.16.0",
+  "version": "0.1.0",
   "description": "FSM-based application core; manges state stores, services, triggers...",
   "keywords": [],
   "homepage": "https://github.com/statewalker/statewalker-fsm-core",
