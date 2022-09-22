@@ -1,4 +1,4 @@
-import { newStore } from "@statewalker/store";
+import { newStore, extendStore, observeStore } from "@statewalker/store";
 
 export default function attachProcessStore(options = {}) {
 
@@ -9,8 +9,8 @@ export default function attachProcessStore(options = {}) {
     const process = state.process;
 
     if (!process.store) {
-      process.store = options.store || newStore();
-    
+      process.store = extendStore(options.store || newStore())
+
       process.setData = (field, value) => {
         return Array.isArray(field)
           ? process.store.setAll(field, value)
@@ -29,7 +29,12 @@ export default function attachProcessStore(options = {}) {
     state.store = process.store;
     state.getData = process.getData;
     state.setData = process.setData;
-    
+    state.observeData = (field) => {
+      let stop, terminated = false;
+      state.done(() => (stop && stop(), terminated = true));
+      return observeStore(state.store, field, (s) => terminated ? s() : stop = s);
+    }
+
     state.useData = (field, action) => {
       let cleanup;
       state.init(() => {
