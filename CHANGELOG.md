@@ -1,5 +1,12 @@
 # @statewalker/fsm-core
 
+## 0.1.3
+
+### Patch Changes
+
+- Updated dependencies
+  - @statewalker/utils@0.4.1
+
 ## 0.1.2
 
 ### Patch Changes

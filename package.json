@@ -1,6 +1,6 @@
 {
   "name": "@statewalker/fsm-core",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "FSM-based application core; manges state stores, services, triggers...",
   "keywords": [],
   "homepage": "https://github.com/statewalker/statewalker-fsm-core",
@@ -35,7 +35,7 @@
     "@statewalker/fsm-process": "0.16.0",
     "@statewalker/services": "0.2.2",
     "@statewalker/store": "0.4.1",
-    "@statewalker/utils": "0.4.0"
+    "@statewalker/utils": "0.4.1"
   },
   "repository": {
     "type": "git",
