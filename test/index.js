@@ -1,2 +1,2 @@
-import "./attachProcessStoreTest.js";
-import "./attachStateServicesTest.js";
+import "./hooks.store.test.js";
+import "./hooks.services.test.js";

@@ -2,33 +2,41 @@ import expect from 'expect.js';
 import { initAsyncProcess, combineHandlers, newStateHandler } from '@statewalker/fsm-process';
 import { initPrinter, usePrinter } from '@statewalker/fsm-process/hooks.printer';
 import config from "./productCatalogStatechart.js";
-import attachStateServices from "../src/attachStateServices.js"
-import { services } from '@statewalker/services';
+import { useEventKey, useInit, useStateKey, useEvent } from '@statewalker/fsm-process/hooks';
+import { consumeServices, initServices, provideService } from '../src/hooks.services.js';
 
-describe('attachStateServices', () => {
+describe('hooks.services.js', () => {
 
   function newPrintChecker() {
     const lines = [];
     return [lines, (...control) => expect(lines.map(items => items.join(''))).to.eql(control)];
   }
 
-  it(`should attach service/useServices methods to states`, async () => {
+  it(`should attach service/use services methods to states`, async () => {
     const [lines, checkLines] = newPrintChecker();
 
     let error;
     const process = initAsyncProcess({
       config,
-      initialize : combineHandlers(
+      initialize: combineHandlers(
         initPrinter({ print: (...args) => lines.push(args) }),
+        initServices()
       ),
-      handler : combineHandlers(
-        attachStateServices(),
-        ({ key, init, getEventKey, service, useServices }) => {
-          expect(typeof service).to.be("function");
-          expect(typeof useServices).to.be("function");
+      handler: combineHandlers(
+        () => {
+          const key = useStateKey();
           const print = usePrinter();
-          init(() => print('* ', key, ': ', getEventKey()))
-        }
+          useInit(() => print(`* ${key}: start`))
+        },
+        newStateHandler({
+          App: () => {
+            const print = usePrinter();
+            consumeServices("test", (list) => print(`* App: Services: [${list.join("; ")}]`))
+          },
+          ProductList: () => {
+            provideService("test", "This is a ProductList service");
+          }
+        })
       ),
       handleError: (e) => error = e
     });
@@ -37,8 +45,10 @@ describe('attachStateServices', () => {
     if (error) throw error;
     checkLines(
       '* App: start',
+      "* App: Services: []",
       '  * ProductCatalog: start',
-      '    * ProductList: start'
+      '    * ProductList: start',
+      "    * App: Services: [This is a ProductList service]"
     )
 
   })
@@ -47,35 +57,42 @@ describe('attachStateServices', () => {
     const [lines, checkLines] = newPrintChecker();
     const publishedServices = [];
 
+    function provideViewService(service) {
+      return provideService("view", service);
+    }
+    function consumeViewServices(consumer) {
+      return consumeServices("view", consumer);
+    }
+
     let error;
     const process = initAsyncProcess({
       config,
-      initialize : combineHandlers(
+      initialize: [
         initPrinter({ print: (...args) => lines.push(args) }),
-      ),
-      handler : combineHandlers(
-        attachStateServices(),
-        ({ key, init, getEventKey, service, useServices }) => {
-          expect(typeof service).to.be("function");
-          expect(typeof useServices).to.be("function");
+        initServices()
+      ],
+      handler: [
+        () => {
+          const key = useStateKey();
+          const getEventKey = useEventKey();
           const print = usePrinter();
-          init(() => print('* ', key, ': ', getEventKey()))
+          useInit(() => print('* ', key, ': ', getEventKey()))
         },
-        newStateHandler({
-          App: ({ useServices }) => {
-            useServices("view", (list) => publishedServices.push(list))
+        {
+          App: () => {
+            consumeViewServices((list) => publishedServices.push(list))
           },
-          ProductCatalog: ({ service }) => {
-            service("view", "ui:ProductCatalog")
+          ProductCatalog: () => {
+            provideViewService("ui:ProductCatalog")
           },
-          ProductView: ({ service }) => {
-            service("view", "ui:ProductView")
+          ProductView: () => {
+            provideViewService("ui:ProductView")
           },
-          ProductBasket : ({ service }) => {
-            service("view", "ui:ProductBasket")
+          ProductBasket: () => {
+            provideViewService("ui:ProductBasket")
           }
-        })
-      ),
+        }
+      ],
       handleError: (e) => error = e
     });
 

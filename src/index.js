@@ -1,2 +1,2 @@
-export { default as attachStateServices } from "./attachStateServices.js";
-export { default as attachProcessStore } from "./attachProcessStore.js";
+export * from "./hooks.services.js";
+export * from "./hooks.store.js";

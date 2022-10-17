@@ -1,7 +1,8 @@
 import expect from 'expect.js';
-import { initAsyncProcess, combineHandlers, attachStatePrinter, newStateHandler } from '@statewalker/fsm-process';
+import { initAsyncProcess, combineHandlers, newStateHandler } from '@statewalker/fsm-process';
+import { initPrinter, usePrinter }  from '@statewalker/fsm-process/hooks.printer';
 import config from "./productCatalogStatechart.js";
-import attachProcessStore from "../src/attachProcessStore.js"
+import { attachProcessStore, useStore } from "../src/attachProcessStore.js"
 
 describe('attachProcessStore', () => {
 
@@ -35,40 +36,46 @@ describe('attachProcessStore', () => {
   it(`should define setData/ useData`, async () => {
     const [lines, checkLines] = newPrintChecker();
 
-    const handler = combineHandlers(
-      attachStatePrinter({ print: (...args) => lines.push(args) }),
-      attachProcessStore(),
-      ({ key, init, done, print }) => {
-        init(() => print('-> ', key));
-        done(() => print('<- ', key));
-      },
-      newStateHandler({
-        "App": ({ init, setData }) => {
-          init(() => {
-            setData("message", "Hello Application!")
-          });
-        },
-        "ProductList": ({ useData, print }) => {
-          useData(["message"], ({ message }) => {
-            print(" * [ProductList]: ", message);
-          })
-        },
-
-        "ProductBasket": ({ setData }) => {
-          setData("message", "Hello from ProductBasket!")
-        },
-
-        "HandleBasketUpdate": ({ useData, print }) => {
-          useData(["message"], ({ message }) => {
-            print(" * [HandleBasketUpdate]: ", message);
-          })
-        },
-
-
-      })
-    );
     let error;
-    const process = initAsyncProcess({ config, handler, handleError: (e) => error = e });
+    const process = initAsyncProcess({
+      config,
+      initialize : combineHandlers(
+        initPrinter({ print: (...args) => lines.push(args) }),
+      ),
+      handler : combineHandlers(
+        attachProcessStore(),
+        ({ key, init, done }) => {
+          const print = usePrinter();
+          init(() => print('-> ', key));
+          done(() => print('<- ', key));
+        },
+        newStateHandler({
+          "App": ({ init, setData }) => {
+            init(() => {
+              setData("message", "Hello Application!")
+            });
+          },
+          "ProductList": ({ useData }) => {
+            const print = usePrinter();
+            useData(["message"], ({ message }) => {
+              print(" * [ProductList]: ", message);
+            })
+          },
+  
+          "ProductBasket": ({ setData }) => {
+            setData("message", "Hello from ProductBasket!")
+          },
+  
+          "HandleBasketUpdate": ({ useData }) => {
+            const print = usePrinter();
+            useData(["message"], ({ message }) => {
+              print(" * [HandleBasketUpdate]: ", message);
+            })
+          },
+        })
+      ),
+      handleError: (e) => error = e
+    });
     await process.next({ key: "start" });
     if (error) throw error;
     checkLines(
@@ -97,31 +104,37 @@ describe('attachProcessStore', () => {
   it(`trigger method should generate new events when the associated data are changed`, async () => {
     const [lines, checkLines] = newPrintChecker();
 
-    const handler = combineHandlers(
-      attachStatePrinter({ print: (...args) => lines.push(args) }),
-      attachProcessStore(),
-      ({ key, init, done, print }) => {
-        init(() => print('-> ', key));
-        done(() => print('<- ', key));
-      },
-      newStateHandler({
-        "App": ({ init, trigger, setData }) => {
-          setData("submit", 1);
-
-          // This trigger listens the "submit" store field
-          // and generates the "addToBasket" event when  
-          // submit counter changes its value.
-          trigger(["submit"], (d, prev) => {
-            // Don't activate the event if this is the first call for the trigger
-            // or the value was not changed since the last call
-            if (!prev || (prev.submit === d.submit)) return;
-            return { key: "addToBasket" };
-          })
-        },
-      })
-    );
     let error;
-    const process = initAsyncProcess({ config, handler, handleError: (e) => error = e });
+    const process = initAsyncProcess({
+      config,
+      initialize : combineHandlers(
+        initPrinter({ print: (...args) => lines.push(args) }),
+      ),
+      handler : combineHandlers(
+        attachProcessStore(),
+        ({ key, init, done }) => {
+          const print = usePrinter();
+          init(() => print('-> ', key));
+          done(() => print('<- ', key));
+        },
+        newStateHandler({
+          "App": ({ init, trigger, setData }) => {
+            setData("submit", 1);
+  
+            // This trigger listens the "submit" store field
+            // and generates the "addToBasket" event when  
+            // submit counter changes its value.
+            trigger(["submit"], (d, prev) => {
+              // Don't activate the event if this is the first call for the trigger
+              // or the value was not changed since the last call
+              if (!prev || (prev.submit === d.submit)) return;
+              return { key: "addToBasket" };
+            })
+          },
+        })
+      ),
+      handleError: (e) => error = e
+    });
     await process.next({ key: "start" });
     if (error) throw error;
     checkLines(
@@ -159,30 +172,37 @@ describe('attachProcessStore', () => {
   it(`observeData should provide value iterator with the life cycle attached to the state`, async () => {
     const [lines, checkLines] = newPrintChecker();
 
-    const handler = combineHandlers(
-      attachStatePrinter({ print: (...args) => lines.push(args) }),
-      attachProcessStore(),
-      ({ key, init, done, print }) => {
-        init(() => print('-> ', key));
-        done(() => print('<- ', key));
-      },
-      newStateHandler({
-        "ProductList": ({ init, observeData, print }) => {
-          init(() => {
-            // Start a new async process, detached from the state init/done cycle
-            (async () => {
-              for await (const message of observeData("message")) {
-                print("* [ProductList]:", message);
-              }
-              print("* [ProductList]: Iteration Finished.");
-            })();
-          })
-        },
-
-      })
-    );
     let error;
-    const process = initAsyncProcess({ config, handler, handleError: (e) => error = e });
+    const process = initAsyncProcess({
+      config,
+      initialize : combineHandlers(
+        initPrinter({ print: (...args) => lines.push(args) })
+      ),
+      handler : combineHandlers(
+        attachProcessStore(),
+        ({ key, init, done }) => {
+          const print = usePrinter();
+          init(() => print('-> ', key));
+          done(() => print('<- ', key));
+        },
+        newStateHandler({
+          "ProductList": ({ init, observeData }) => {
+            const print = usePrinter();
+            init(() => {
+              // Start a new async process, detached from the state init/done cycle
+              (async () => {
+                for await (const message of observeData("message")) {
+                  print("* [ProductList]:", message);
+                }
+                print("* [ProductList]: Iteration Finished.");
+              })();
+            })
+          },
+  
+        })
+      ),
+      handleError: (e) => error = e
+    });
     await process.next({ key: "start" });
     if (error) throw error;
     checkLines(
