@@ -1,4 +1,4 @@
-import { useInit, useDone, useProcess } from "@statewalker/fsm-process";
+import { onActivate, onDeactivate, useProcess } from "@statewalker/fsm-process";
 import { services as servicesInstance } from "@statewalker/services";
 
 export function initServices(options = {}) {
@@ -18,13 +18,13 @@ function useProcessWithServices() {
 export function provideService(serviceKey, service) {
   const process = useProcessWithServices();
   let close;
-  useInit(() => close = process.provideService(serviceKey, service));
-  useDone(() => close && close());
+  onActivate(() => close = process.provideService(serviceKey, service));
+  onDeactivate(() => close && close());
 }
 
 export function consumeServices(serviceKey, consumer) {
   const process = useProcessWithServices();
   let close;
-  useInit(() => close = process.consumeServices(serviceKey, consumer));
-  useDone(() => close && close());
+  onActivate(() => close = process.consumeServices(serviceKey, consumer));
+  onDeactivate(() => close && close());
 }

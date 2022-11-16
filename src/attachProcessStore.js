@@ -1,5 +1,5 @@
 import { newStore, extendStore, observeStore } from "@statewalker/store";
-import { useProcess, useInit, useDone, useDispatch } from "@statewalker/fsm-process/hooks";
+import { useProcess, onActivate, onDeactivate, useDispatch } from "@statewalker/fsm-process/hooks";
 
 export function initStore(options) {
   return (process) => {
@@ -39,7 +39,7 @@ export function useData(field) {
 
 export function useDataIterator(field, defaultTransform = v => v) {
   let stop, terminated = false;
-  useDone(() => (stop && stop(), terminated = true));
+  onDeactivate(() => (stop && stop(), terminated = true));
   return _useProcessWithStore(process => async function* (transform = defaultTransform) {
     if (terminated) return;
     const iterator = observeStore(process.store, field, (s) => terminated ? s() : stop = s);
@@ -52,7 +52,7 @@ export function useDataIterator(field, defaultTransform = v => v) {
 export function withData(field, action) {
   let cleanup;
   const process = _useProcessWithStore(process => process);
-  useInit(() => {
+  onActivate(() => {
     let prev;
     let use = Array.isArray(field) ? process.store.useAll : process.store.use;
     cleanup = use(field, (value) => {
@@ -60,7 +60,7 @@ export function withData(field, action) {
       prev = value;
     });
   });
-  useDone(() => cleanup && cleanup());
+  onDeactivate(() => cleanup && cleanup());
   return () => cleanup && cleanup();
 }
 
@@ -86,8 +86,8 @@ export function useTimeout(delay, action = () => ({ key: "ok" })) {
   const { startTimer = setTimeout, stopTimer = clearTimeout } = process.timerOptions || {};
   let id;
   const cleanup = () => (id && stopTimer(id), id = null);
-  useInit(() => (id = startTimer(() => dispatchEvent(action()), delay)));
-  useDone(cleanup);
+  onActivate(() => (id = startTimer(() => dispatchEvent(action()), delay)));
+  onDeactivate(cleanup);
   return cleanup;
 }
 

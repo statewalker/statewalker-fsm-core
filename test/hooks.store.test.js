@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import { initAsyncProcess, combineHandlers, newStateHandler } from '@statewalker/fsm-process';
 import { initPrinter, usePrinter } from '@statewalker/fsm-process/hooks.printer';
-import { useStateKey, useInit, useDone } from '@statewalker/fsm-process/hooks';
+import { useStateKey, onActivate, onDeactivate } from '@statewalker/fsm-process/hooks';
 import config from "./productCatalogStatechart.js";
 import { initStore, useStore, useData, withData, useDataIterator, useTimeout, useTrigger } from "../src/hooks.store.js"
 
@@ -101,13 +101,13 @@ describe('hookds.store.js', () => {
         () => {
           const key = useStateKey();
           const print = usePrinter();
-          useInit(() => print('-> ', key));
-          useDone(() => print('<- ', key));
+          onActivate(() => print('-> ', key));
+          onDeactivate(() => print('<- ', key));
         },
         newStateHandler({
           "App": () => {
             const [, setMessage] = useData("message");
-            useInit(() => setMessage("Hello Application!"));
+            onActivate(() => setMessage("Hello Application!"));
           },
           "ProductList": () => {
             const print = usePrinter();
@@ -169,8 +169,8 @@ describe('hookds.store.js', () => {
         () => {
           const key = useStateKey();
           const print = usePrinter();
-          useInit(() => print('-> ', key));
-          useDone(() => print('<- ', key));
+          onActivate(() => print('-> ', key));
+          onDeactivate(() => print('<- ', key));
         },
         newStateHandler({
           "App": () => {
@@ -236,18 +236,18 @@ describe('hookds.store.js', () => {
         () => {
           const key = useStateKey();
           const print = usePrinter();
-          useInit(() => print('-> ', key));
-          useDone(() => print('<- ', key));
+          onActivate(() => print('-> ', key));
+          onDeactivate(() => print('<- ', key));
         },
         newStateHandler({
           "App": () => {
             const [, setMessage] = useData("message");
-            useInit(() => setMessage(" initial message"))
+            onActivate(() => setMessage(" initial message"))
           },
           "ProductList": () => {
             const print = usePrinter();
             const getMessages = useDataIterator("message");
-            useInit(() => {
+            onActivate(() => {
               // Start a new async process, detached from the state init/done cycle
               (async () => {
                 print("* [ProductList]: Start Iterations.");
