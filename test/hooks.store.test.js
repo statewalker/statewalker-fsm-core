@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import { initAsyncProcess, combineHandlers, newStateHandler } from '@statewalker/fsm-process';
-import { initPrinter, usePrinter } from '@statewalker/fsm-process/hooks.printer';
-import { useStateKey, onActivate, onDeactivate } from '@statewalker/fsm-process/hooks';
+import { initPrinter, usePrinter } from '@statewalker/fsm-process';
+import { useStateKey, onActivate, onDeactivate } from '@statewalker/fsm-process';
 import config from "./productCatalogStatechart.js";
 import { initStore, useStore, useData, withData, useDataIterator, useTimeout, useTrigger } from "../src/hooks.store.js"
 

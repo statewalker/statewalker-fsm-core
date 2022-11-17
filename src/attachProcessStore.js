@@ -1,5 +1,5 @@
 import { newStore, extendStore, observeStore } from "@statewalker/store";
-import { useProcess, onActivate, onDeactivate, useDispatch } from "@statewalker/fsm-process/hooks";
+import { useProcess, onActivate, onDeactivate, useDispatch } from "@statewalker/fsm-process";
 
 export function initStore(options) {
   return (process) => {

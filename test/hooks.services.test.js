@@ -1,8 +1,8 @@
 import expect from 'expect.js';
 import { initAsyncProcess, combineHandlers, newStateHandler } from '@statewalker/fsm-process';
-import { initPrinter, usePrinter } from '@statewalker/fsm-process/hooks.printer';
+import { initPrinter, usePrinter } from '@statewalker/fsm-process';
 import config from "./productCatalogStatechart.js";
-import { useEventKey, onActivate, useStateKey, useEvent } from '@statewalker/fsm-process/hooks';
+import { useEventKey, onActivate, useStateKey, useEvent } from '@statewalker/fsm-process';
 import { consumeServices, initServices, provideService } from '../src/hooks.services.js';
 
 describe('hooks.services.js', () => {
