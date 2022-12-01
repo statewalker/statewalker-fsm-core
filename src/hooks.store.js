@@ -1,5 +1,5 @@
 import { newStore, extendStore, observeStore } from "@statewalker/store";
-import { useProcess, onActivate, useDone, useDispatch } from "@statewalker/fsm-process";
+import { useProcess, onActivate, onDeactivate, useDispatch } from "@statewalker/fsm-process";
 
 export function initStore(options = {}) {
   return (process) => {
@@ -43,7 +43,7 @@ export function useData(field) {
 
 export function useDataIterator(field, defaultTransform = v => v) {
   let stop, terminated = false;
-  useDone(() => (stop && stop(), terminated = true));
+  onDeactivate(() => (stop && stop(), terminated = true));
   const process = _useProcessWithStore();
   return async function* (transform = defaultTransform) {
     if (terminated) return;
@@ -65,7 +65,7 @@ export function withData(field, action) {
       prev = value;
     });
   });
-  useDone(() => cleanup && cleanup());
+  onDeactivate(() => cleanup && cleanup());
   return () => cleanup && cleanup();
 }
 
@@ -100,7 +100,7 @@ export function useTimeout(delay, action = () => ({ key: "ok" })) {
   let id;
   const cleanup = () => (id && stopTimer(id), id = null);
   onActivate(() => (id = startTimer(() => dispatchEvent(action()), delay)));
-  useDone(cleanup);
+  onDeactivate(cleanup);
   return cleanup;
 }
 
