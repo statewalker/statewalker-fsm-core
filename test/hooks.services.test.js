@@ -1,4 +1,4 @@
-import expect from 'expect.js';
+import { describe, it, expect } from "./deps.js";
 import { initAsyncProcess, combineHandlers, newStateHandler } from '@statewalker/fsm-process';
 import { initPrinter, usePrinter } from '@statewalker/fsm-process';
 import config from "./productCatalogStatechart.js";
@@ -9,7 +9,7 @@ describe('hooks.services.js', () => {
 
   function newPrintChecker() {
     const lines = [];
-    return [lines, (...control) => expect(lines.map(items => items.join(''))).to.eql(control)];
+    return [lines, (...control) => expect(lines.map(items => items.join(''))).toEqual(control)];
   }
 
   it(`should attach service/use services methods to states`, async () => {
@@ -96,7 +96,7 @@ describe('hooks.services.js', () => {
       handleError: (e) => error = e
     });
 
-    expect(publishedServices).to.eql([]);
+    expect(publishedServices).toEqual([]);
 
     await process.next({ key: "start" });
     if (error) throw error;
@@ -106,7 +106,7 @@ describe('hooks.services.js', () => {
       '    * ProductList: start'
     )
 
-    expect(publishedServices).to.eql([
+    expect(publishedServices).toEqual([
       [],
       ["ui:ProductCatalog"]
     ]);
@@ -120,7 +120,7 @@ describe('hooks.services.js', () => {
       '    * ProductList: start',
       '    * ProductView: showDetails'
     )
-    expect(publishedServices).to.eql([
+    expect(publishedServices).toEqual([
       [],
       ["ui:ProductCatalog"],
       ['ui:ProductCatalog', 'ui:ProductView']
@@ -137,7 +137,7 @@ describe('hooks.services.js', () => {
       '  * ProductBasket: addToBasket',
       '    * HandleBasketUpdate: addToBasket'
     )
-    expect(publishedServices).to.eql([
+    expect(publishedServices).toEqual([
       [],
       ['ui:ProductCatalog'],
       ['ui:ProductCatalog', 'ui:ProductView'],

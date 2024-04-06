@@ -11,18 +11,18 @@
   "license": "MIT",
   "type": "module",
   "files": [
-    "dist/**/package.json",
-    "dist/**/*.js",
-    "src/**/*.js",
-    "index.js"
+    "dist",
+    "src"
   ],
-  "module": "src/index.js",
-  "main": "src/index.js",
-  "jsdelivr": "dist/index.js",
-  "unpkg": "dist/index.js",
+  "module": "./dist/index.js",
+  "main": "./dist/index.js",
+  "jsdelivr": "./dist/index.js",
+  "unpkg": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    "umd": "./dist/index-umd.min.js",
-    "default": "./src/index.js"
+    ".": {
+      "import": "./src/index.ts"
+    }
   },
   "dependencies": {
     "@statewalker/fsm-process": "0.17.2",
@@ -31,21 +31,24 @@
     "@statewalker/utils": "0.4.2"
   },
   "devDependencies": {
-    "@statewalker/rollup": "^0.1.6",
-    "eslint": "^8",
-    "expect.js": "^0.3",
-    "mocha": "^10",
-    "rollup": "^3"
+    "@statewalker/eslint-config": "*",
+    "@statewalker/typescript-config": "*",
+    "eslint": "^9.0.0",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.4",
+    "vitest": "^1.4.0"
   },
   "repository": {
     "type": "git",
     "url": "git@github.com:statewalker/statewalker-fsm-core.git"
   },
   "scripts": {
-    "eslint": "eslint src",
-    "rollup": "rollup -c",
-    "test": "mocha -R spec ./test/index.js && yarn eslint",
-    "prepublishOnly": "rm -rf dist && yarn test && yarn rollup"
+    "build": "yarn test && tsup",
+    "watch": "tsup --watch",
+    "clean": "rm -rf dist",
+    "lint": "eslint \"**/*.(js|ts)\"",
+    "test": "vitest --run",
+    "test:watch": "vitest"
   },
   "sideEffects": false,
   "publishConfig": {

@@ -1,0 +1,3 @@
+{
+  "extends": "@statewalker/typescript-config/base.json"
+}

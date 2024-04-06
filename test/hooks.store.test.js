@@ -1,4 +1,4 @@
-import expect from 'expect.js';
+import { describe, it, expect } from "./deps.js";
 import { initAsyncProcess, combineHandlers, newStateHandler } from '@statewalker/fsm-process';
 import { initPrinter, usePrinter } from '@statewalker/fsm-process';
 import { useStateKey, onActivate, onDeactivate } from '@statewalker/fsm-process';
@@ -9,7 +9,7 @@ describe('hookds.store.js', () => {
 
   function newPrintChecker() {
     const lines = [];
-    return [(...args) => lines.push(args), (...control) => expect(lines.map(items => items.join(''))).to.eql(control)];
+    return [(...args) => lines.push(args), (...control) => expect(lines.map(items => items.join(''))).toEqual(control)];
   }
 
   it(`should throw an error if  the 'store' field and 'getData', 'setData','useData', 'observeData', 'trigger' and 'timeout' methods to states`, async () => {
@@ -22,7 +22,7 @@ describe('hookds.store.js', () => {
       handleError: (e) => error = e
     });
     await process.next({ key: "start" });
-    expect(error instanceof Error).to.be(true);
+    expect(error instanceof Error).toBe(true);
   })
 
   async function checkStoreMethod(handler) {
@@ -42,20 +42,20 @@ describe('hookds.store.js', () => {
   it(`useStore: should return an activated store instance`, async () => {
     await checkStoreMethod(() => {
       const store = useStore();
-      expect(typeof store).to.be('function');
+      expect(typeof store).toBe('function');
     })
   })
   it(`useData: should return [getData, setData] methods`, async () => {
     await checkStoreMethod(() => {
       const [getData, setData] = useData("abc");
-      expect(typeof getData).to.be('function');
-      expect(typeof setData).to.be('function');
+      expect(typeof getData).toBe('function');
+      expect(typeof setData).toBe('function');
     })
   })
   it(`useDataIterator: should return an async generator`, async () => {
     await checkStoreMethod(() => {
       const gen = useDataIterator("abc");
-      expect(typeof gen).to.be("function");
+      expect(typeof gen).toBe("function");
     })
   })
   it(`withData: should a function handling properties changes`, async () => {
@@ -69,7 +69,7 @@ describe('hookds.store.js', () => {
       const store = useStore();
       store.set("abc", 'hello');
     })
-    expect(values).to.eql([
+    expect(values).toEqual([
       { value: 'hello', stateKey: 'App', counter: 0 },
       { value: 'hello', stateKey: 'ProductCatalog', counter: 1 },
       { value: 'hello', stateKey: 'ProductList', counter: 2 }
@@ -78,13 +78,13 @@ describe('hookds.store.js', () => {
   it(`useTimeout: should return a function generating new events at the end of the specified period`, async () => {
     await checkStoreMethod(() => {
       const cleanup = useTimeout(10);
-      expect(typeof cleanup).to.be("function");
+      expect(typeof cleanup).toBe("function");
     })
   })
   it(`useTrigger: should be a function generating new events at the end of the specified period`, async () => {
     await checkStoreMethod(() => {
       const gen = useTrigger("abc", (data) => ({ key: "ok", data }));
-      expect(typeof gen).to.be("function");
+      expect(typeof gen).toBe("function");
     })
   })
 
@@ -202,9 +202,9 @@ describe('hookds.store.js', () => {
     const prevRunningPromise = process.running;
     // Updates the "submit" field. It should generate a new event
     process.setData("submit", 2);
-    expect(process.running !== prevRunningPromise).to.be(true);
+    expect(process.running !== prevRunningPromise).toBe(true);
     await process.running;
-    expect(process.running).to.be(undefined);
+    expect(process.running).toBe(undefined);
 
     if (error) throw error;
     checkLines(
@@ -219,7 +219,7 @@ describe('hookds.store.js', () => {
 
     // The submit value was not changed:
     process.setData("submit", 2);
-    expect(process.running).to.be(undefined);
+    expect(process.running).toBe(undefined);
   })
 
   it(`observeData should provide value iterator with the life cycle attached to the state`, async () => {
